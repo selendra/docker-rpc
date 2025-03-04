@@ -7,6 +7,7 @@ services:
       - "9933:9933"
       - "40333:40333"
     volumes:
-      # This maps the container's save-db-directory (inside /data) to a directory on your host.
+      # Mount the host's selendra-node binary into the container.
+      - /usr/local/bin/selendra-node:/usr/local/bin/selendra-node:ro
       - ./save-db-directory:/data/save-db-directory
     restart: unless-stopped

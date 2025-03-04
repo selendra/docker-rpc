@@ -1,0 +1,12 @@
+version: '3.8'
+services:
+  selendra:
+    build: .
+    container_name: selendra-node
+    ports:
+      - "9933:9933"
+      - "40333:40333"
+    volumes:
+      # This maps the container's save-db-directory (inside /data) to a directory on your host.
+      - ./save-db-directory:/data/save-db-directory
+    restart: unless-stopped

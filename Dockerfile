@@ -1,7 +1,9 @@
 FROM debian:buster-slim
 
 WORKDIR /data
-VOLUME /data
+
+# VOLUME /data
+
 EXPOSE 9933
 EXPOSE 40333
 

@@ -2,20 +2,20 @@
 FROM rust:latest AS builder
 
 WORKDIR /usr/src/selendra
-# Clone the repository (update the URL if necessary)
 RUN git clone https://github.com/selendra/selendra.git .
-# Build the binary in release mode
+
+RUN rustup toolchain install 1.74-x86_64-unknown-linux-gnu && \
+    rustup default 1.74-x86_64-unknown-linux-gnu
+
 RUN cargo build --release
 
 # Stage 2: Create a lightweight runtime image
 FROM debian:buster-slim
 
-# Copy the compiled binary from the builder stage
 COPY --from=builder /usr/src/selendra/target/release/selendra-node /usr/local/bin/selendra-node
 
-# Set the working directory to the persistent storage directory
 WORKDIR /data
-# Declare a volume for persistent data storage
+
 VOLUME /data
 
 # Expose the necessary ports

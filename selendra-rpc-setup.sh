@@ -260,7 +260,7 @@ setup_ssl() {
     # Prompt for email address
     read -p "Enter email address for SSL certificate notifications: " SSL_EMAIL
     if [ -z "$SSL_EMAIL" ]; then
-        SSL_EMAIL="admin@$domain"
+        SSL_EMAIL="selendra@$domain"
         print_message "Using default email: $SSL_EMAIL"
     fi
     
@@ -609,7 +609,16 @@ main() {
     download_selendra
     
     # Get node configuration
-    IFS=
+    IFS=$'\n'
+    NODE_CONFIG=($(get_node_config))
+    
+    NODE_NAME=$(echo "${NODE_CONFIG[0]}" | cut -d= -f2)
+    DB_PATH=$(echo "${NODE_CONFIG[1]}" | cut -d= -f2)
+    RPC_PORT=$(echo "${NODE_CONFIG[2]}" | cut -d= -f2)
+    P2P_PORT=$(echo "${NODE_CONFIG[3]}" | cut -d= -f2)
+    
+    # Ensure the base directory exists
+    mkdir -p "$DB_PATH"
     
     # Set up Nginx
     setup_nginx $DOMAIN_NAME
@@ -710,81 +719,6 @@ Usage:
   ${YELLOW}selendra-rpc help${NC}         - Display all available commands
 
 This command is available system-wide and can be run from any directory.
-
-SSL certificates will automatically renew via certbot's timer.
-
-${GREEN}==================================================${NC}
-EOL
-}
-
-# Run the main function
-main
-\n'
-    NODE_CONFIG=($(get_node_config))
-    
-    NODE_NAME=$(echo "${NODE_CONFIG[0]}" | cut -d= -f2)
-    DB_PATH=$(echo "${NODE_CONFIG[1]}" | cut -d= -f2)
-    RPC_PORT=$(echo "${NODE_CONFIG[2]}" | cut -d= -f2)
-    P2P_PORT=$(echo "${NODE_CONFIG[3]}" | cut -d= -f2)
-    
-    # Ensure the base directory exists
-    mkdir -p "$DB_PATH"
-    
-    # Set up Nginx
-    setup_nginx $DOMAIN_NAME
-    
-    # Get server IP
-    SERVER_IP=$(get_server_ip)
-    
-    # Check if domain points to this server
-    if ! check_domain_dns $DOMAIN_NAME $SERVER_IP; then
-        print_warning "Please update your DNS settings to point $DOMAIN_NAME to $SERVER_IP"
-        read -p "Press Enter to continue once you've updated your DNS settings (or wait for propagation)..."
-        
-        # Wait for DNS propagation (optional)
-        print_message "Waiting for DNS propagation (may take a few minutes)..."
-        for i in {1..6}; do
-            if check_domain_dns $DOMAIN_NAME $SERVER_IP; then
-                break
-            fi
-            print_message "Waiting for DNS propagation (attempt $i/6)..."
-            sleep 10
-        done
-    fi
-    
-    # Set up SSL with certbot
-    setup_ssl $DOMAIN_NAME
-    
-    # Create systemd service
-    create_systemd_service $DOMAIN_NAME "$NODE_NAME" "$DB_PATH" "$RPC_PORT" "$P2P_PORT"
-    
-    # Print completion message
-    cat << EOL
-
-${GREEN}==================================================${NC}
-${GREEN}       Selendra RPC Setup Complete!              ${NC}
-${GREEN}==================================================${NC}
-
-Your Selendra RPC node has been set up with the following configuration:
-
-Domain: ${YELLOW}$DOMAIN_NAME${NC}
-Server IP: ${YELLOW}$SERVER_IP${NC}
-Node Name: ${YELLOW}$NODE_NAME${NC}
-RPC Endpoint: ${YELLOW}https://$DOMAIN_NAME${NC}
-Database Path: ${YELLOW}$DB_PATH${NC}
-RPC Port: ${YELLOW}$RPC_PORT${NC}
-P2P Port: ${YELLOW}$P2P_PORT${NC}
-
-Management commands have been installed for easy service control:
-
-  ${YELLOW}selendra-start${NC}    - Start the Selendra RPC service
-  ${YELLOW}selendra-stop${NC}     - Stop the Selendra RPC service
-  ${YELLOW}selendra-restart${NC}  - Restart the Selendra RPC service
-  ${YELLOW}selendra-status${NC}   - Check the status of the Selendra RPC service
-  ${YELLOW}selendra-logs${NC}     - View the Selendra RPC service logs in real-time
-  ${YELLOW}selendra-help${NC}     - Display all available commands
-
-These commands are available system-wide and can be run without changing directories.
 
 SSL certificates will automatically renew via certbot's timer.
 

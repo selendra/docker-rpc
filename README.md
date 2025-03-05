@@ -2,6 +2,16 @@
 
 A comprehensive automation script for setting up a Selendra RPC node with HTTPS support across various Linux distributions.
 
+## ⚠️ Important: DNS Configuration First
+
+**Before running this script, make sure your domain's DNS A record points to your server's IP address!**
+
+The SSL certificate setup will fail if your domain doesn't resolve to your server. The script includes verification and waiting options, but setting up DNS in advance will make the installation smoother.
+
+1. Create an A record for your domain (e.g., `rpcx.selendra.org`)
+2. Point it to your server's IP address
+3. Wait for DNS propagation (can take up to 24-48 hours, but often just minutes)
+
 ## Features
 
 - **Cross-Distribution Support**: Works on Arch Linux, Debian, Ubuntu, Fedora, RHEL, CentOS, and more
@@ -14,15 +24,18 @@ A comprehensive automation script for setting up a Selendra RPC node with HTTPS 
 ## Prerequisites
 
 - A Linux server with root/sudo access
-- A domain name that you can configure (DNS A record pointing to your server)
+- **A domain name with DNS A record already pointing to your server IP**
 - Open ports 80 and 443 (for HTTP/HTTPS)
 - Open port 40333 (default P2P port, configurable)
 
 ## Quick Installation
 
 ```bash
-# Download the script
-wget https://example.com/selendra-rpc-setup.sh -O selendra-rpc-setup.sh
+# Option 1: Download with wget
+wget https://github.com/selendra/selendra-rpc/raw/main/selendra-rpc-setup.sh -O selendra-rpc-setup.sh
+
+# Option 2: Download with curl
+curl -L https://github.com/selendra/selendra-rpc/raw/main/selendra-rpc-setup.sh -o selendra-rpc-setup.sh
 
 # Make it executable
 chmod +x selendra-rpc-setup.sh
@@ -91,12 +104,25 @@ The Selendra node runs with the following default parameters:
 
 ## DNS Configuration
 
-For the SSL setup to work correctly, you need to configure your domain's DNS settings:
+**🚨 CRITICAL: Configure your DNS BEFORE running the script!**
 
-1. Create an A record for your domain (e.g., `rpcx.selendra.org`)
-2. Point it to your server's IP address
+For the SSL setup to work correctly, your domain must point to your server:
 
-The script includes DNS verification and will guide you through options if DNS isn't properly configured.
+1. Log in to your domain registrar or DNS provider
+2. Create an A record for your domain (e.g., `rpcx.selendra.org`)
+3. Enter your server's IP address as the value
+4. Save the changes and wait for propagation
+
+You can verify DNS propagation with:
+```bash
+dig +short your-domain.com
+# or
+nslookup your-domain.com
+```
+
+The output should show your server's IP address. If it doesn't, wait longer for propagation or check your DNS configuration.
+
+The script includes DNS verification and will guide you through options if DNS isn't properly configured, but setting it up in advance will prevent certificate issuance failures.
 
 ## Troubleshooting
 
@@ -145,10 +171,11 @@ This script is provided under the MIT License.
 
 ## Contributors
 
-- [Your Name/Organization]
+- Selendra Foundation
+- Community Contributors
 
 ## Support
 
-For assistance with this script, please [create an issue](https://github.com/yourusername/selendra-rpc-setup/issues) on GitHub.
+For assistance with this script, please [create an issue](https://github.com/selendra/selendra-rpc/issues) on GitHub.
 
 For Selendra-specific questions, refer to the [Selendra documentation](https://docs.selendra.org).
